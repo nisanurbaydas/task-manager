@@ -1,0 +1,30 @@
+{
+  "name": "task-manager",
+  "version": "1.0.0",
+  "description": "\"# task-manager\"",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nisanurbaydas/task-manager.git"
+  },
+  "author": "Nisa",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/nisanurbaydas/task-manager/issues"
+  },
+  "homepage": "https://github.com/nisanurbaydas/task-manager#readme",
+  "dependencies": {
+    "dotenv": "^16.0.0",
+    "express": "^4.17.3",
+    "helmet": "^5.1.0",
+    "http-status": "^1.5.2",
+    "mongoose": "^6.2.10",
+    "prettier": "^2.6.2"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.15"
+  }
+}
