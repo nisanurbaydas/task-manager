@@ -3,7 +3,7 @@ const helmet = require('helmet');
 const config = require('./config');
 const loaders = require('./loaders');
 
-const ProjectRoutes = require('./routes/Project');
+const { ProjectRoutes } = require('./routes');
 
 config();
 loaders();
