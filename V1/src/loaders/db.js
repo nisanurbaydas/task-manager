@@ -7,13 +7,11 @@ db.once('open', () => {
 });
 
 const connectDB = async () => {
-  await Mongoose.connect(
-    `mongodb://${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}`,
-    {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    }
-  );
+  const { DB_HOST, DB_PORT, DB_NAME } = process.env;
+  await Mongoose.connect(`mongodb://${DB_HOST}:${DB_PORT}/${DB_NAME}`, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  });
 };
 
 module.exports = {
