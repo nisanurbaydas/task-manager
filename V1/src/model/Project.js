@@ -1,4 +1,4 @@
-const Mongoose = require('Mongoose');
+const Mongoose = require('mongoose');
 
 const ProjectSchema = new Mongoose.Schema(
   {
