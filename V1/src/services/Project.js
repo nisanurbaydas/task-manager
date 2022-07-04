@@ -1,8 +1,7 @@
 const Project = require('../model/Project');
 
 const insert = (data) => {
-  const project = new Project(data);
-  return project.save();
+  return new Project(data).save();
 };
 
 const list = () => {

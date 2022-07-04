@@ -8,7 +8,7 @@ db.once('open', () => {
 
 const connectDB = async () => {
   const { DB_HOST, DB_PORT, DB_NAME } = process.env;
-  await Mongoose.connect(`mongodb://localhost:27017/task-manager`, {
+  await Mongoose.connect(`mongodb://${DB_HOST}:${DB_PORT}/${DB_NAME}`, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   });
