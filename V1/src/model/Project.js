@@ -1,4 +1,5 @@
 const Mongoose = require('mongoose');
+const logger = require('../scripts/logger/Project');
 
 const ProjectSchema = new Mongoose.Schema(
   {
@@ -10,5 +11,12 @@ const ProjectSchema = new Mongoose.Schema(
   },
   { timestamps: true, versionKey: false }
 );
+
+ProjectSchema.post('save', (doc) => {
+  logger.log({
+    level: 'info',
+    message: doc,
+  });
+});
 
 module.exports = Mongoose.model('Project', ProjectSchema);
