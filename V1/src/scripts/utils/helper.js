@@ -5,7 +5,7 @@ const passwordToHash = (password) => {
     password,
     process.env.PASSWORD_HASH
   ).toString();
-  return CryptoJS.HmacSHA256(password, hashKey);
+  return CryptoJS.HmacSHA256(password, hashKey).toString();
 };
 
 module.exports = {

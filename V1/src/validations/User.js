@@ -6,6 +6,12 @@ const createUser = Joi.object({
   email: Joi.string().email().required().min(8),
 });
 
+const userLogin = Joi.object({
+  email: Joi.string().email().required().min(8),
+  password: Joi.string().required().min(8),
+});
+
 module.exports = {
   createUser,
+  userLogin,
 };

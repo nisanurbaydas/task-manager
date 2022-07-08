@@ -8,7 +8,12 @@ const list = () => {
   return User.find({});
 };
 
+const findOne = (where) => {
+  return User.findOne(where);
+};
+
 module.exports = {
   insert,
   list,
+  findOne,
 };
