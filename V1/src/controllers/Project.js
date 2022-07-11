@@ -8,11 +8,12 @@ const index = (req, res) => {
       res.status(httpStatus.OK).send(response);
     })
     .catch((e) => {
-      res.status(httpStatus.INTERNAL_SERVER_ERROR).send(e);
+      res.status(httpStatus.INTERNAL_SERVER_ERROR).send(e.message);
     });
 };
 
 const create = (req, res) => {
+  req.body.user_id = req.user;
   insert(req.body)
     // res.status(httpStatus.CREATED).send("Project Create");
     .then((response) => {

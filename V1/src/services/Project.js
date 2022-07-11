@@ -1,7 +1,10 @@
 const Project = require('../model/Project');
 
 const list = () => {
-  return Project.find({});
+  return Project.find({}).populate({
+    path: "user_id",
+    select: "full_name email"
+  });
 };
 
 const insert = (data) => {

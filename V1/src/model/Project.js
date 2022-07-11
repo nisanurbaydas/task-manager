@@ -6,7 +6,7 @@ const ProjectSchema = new Mongoose.Schema(
     name: String,
     user_id: {
     type: Mongoose.Types.ObjectId,
-    ref: 'user',
+    ref: 'User',
   },
   },
   { timestamps: true, versionKey: false }
