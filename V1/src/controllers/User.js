@@ -1,6 +1,7 @@
 const httpStatus = require('http-status');
 
 const { insert, list, findOne } = require('../services/User');
+const projectService = require('../services/Project');
 const {
   passwordToHash,
   generateJWTAccessToken,
@@ -49,8 +50,22 @@ const login = (req, res) => {
     .catch((e) => res.status(httpStatus.INTERNAL_SERVER_ERROR).send(e));
 };
 
+const projectList = (req, res) => {
+  projectService
+    .list({ user_id: req.user?._id })
+    .then((projects) => {
+      res.status(httpStatus.OK).send(projects);
+    })
+    .catch(() =>
+      res
+        .status(httpStatus.INTERNAL_SERVER_ERROR)
+        .send({ error: 'Soething went wronng' })
+    );
+};
+
 module.exports = {
   index,
   create,
   login,
+  projectList,
 };

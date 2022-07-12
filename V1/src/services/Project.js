@@ -1,9 +1,9 @@
 const Project = require('../model/Project');
 
-const list = () => {
-  return Project.find({}).populate({
-    path: "user_id",
-    select: "full_name email"
+const list = (where) => {
+  return Project.find(where || {}).populate({
+    path: 'user_id',
+    select: 'full_name email',
   });
 };
 
