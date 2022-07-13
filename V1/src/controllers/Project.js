@@ -1,6 +1,6 @@
 const httpStatus = require('http-status');
 
-const { insert, list, modify } = require('../services/Project');
+const { insert, list, modify, remove } = require('../services/Project');
 
 const index = (req, res) => {
   list()
@@ -34,15 +34,31 @@ const update = (req, res) => {
     .then((updatedProject) => {
       res.status(httpStatus.OK).send(updatedProject);
     })
-    .catch((e) =>
+    .catch(() =>
       res
         .status(httpStatus.INTERNAL_SERVER_ERROR)
         .send({ error: 'Something went wrong' })
     );
 };
 
+const deleteProject = (req, res) => {
+  if (!req.params.id) {
+    return res.status(httpStatus.BAD_REQUEST).send('Missing information');
+  }
+  remove(req.params?.id)
+    .then((deletedItem) => {
+      res.status(httpStatus.OK).send(deletedItem);
+    })
+    .catch(() => {
+      res
+        .status(httpStatus.INTERNAL_SERVER_ERROR)
+        .send({ error: 'Something went wrong' });
+    });
+};
+
 module.exports = {
   index,
   create,
   update,
+  deleteProject
 };
