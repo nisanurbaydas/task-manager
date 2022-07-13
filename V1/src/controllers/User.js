@@ -90,10 +90,21 @@ const resetPassword = (req, res) => {
     );
 };
 
+const update = (req, res) => {
+  modify({ _id: req.user?._id }, req.body)
+    .then((updatedUser) => {
+      res.status(httpStatus.OK).send(updatedUser);
+    })
+    .catch(() => {
+      res.status(httpStatus.INTERNAL_SERVER_ERROR).send('Something went wrong');
+    });
+};
+
 module.exports = {
   index,
   create,
   login,
   projectList,
   resetPassword,
+  update
 };
