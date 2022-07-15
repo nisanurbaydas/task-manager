@@ -1,3 +1,4 @@
+const path = require('path');
 const httpStatus = require('http-status');
 const uuid = require('uuid');
 
@@ -100,11 +101,36 @@ const update = (req, res) => {
     });
 };
 
+const updateProfileImage = (req, res) => {
+  // Check file
+  if (!req?.files?.profile_image) {
+    return res.status(httpStatus.BAD_REQUEST).send({ error: 'Missing info' });
+  }
+
+  //Upload
+  const extension = path.extname(req.files.profile_image.name);
+  const fileName = `${req?.user._id}${extension}`;
+  const folderPath = path.join(__dirname, '../', 'uploads/users', fileName);
+
+  req.files.profile_image.mv(folderPath, function (err) {
+    if (err)
+      return res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error: err });
+    modify({ _id: req.user._id }, { profile_image: fileName })
+      .then((updatedUser) => {
+        res.status(httpStatus.OK).send(updatedUser);
+      })
+      .catch((e) =>
+        res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error: e })
+      );
+  });
+};
+
 module.exports = {
   index,
   create,
   login,
   projectList,
   resetPassword,
-  update
+  update,
+  updateProfileImage
 };

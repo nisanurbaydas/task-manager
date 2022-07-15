@@ -7,6 +7,7 @@ const {
   login,
   projectList,
   resetPassword,
+  updateProfileImage
 } = require('../controllers/User');
 const validate = require('../middlewares/validate');
 const authenticate = require('../middlewares/authenticate');
@@ -27,5 +28,6 @@ router.route('/projects').get(authenticate, projectList);
 router
   .route('/reset-password')
   .post(validate(resetPasswordValidation), resetPassword);
+router.route('/update-profile-image').post(authenticate, updateProfileImage);
 
 module.exports = router;
