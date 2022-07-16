@@ -7,7 +7,7 @@ const config = require('./config');
 const loaders = require('./loaders');
 const events = require('./scripts/events');
 
-const { ProjectRoutes, UserRoutes } = require('./routes');
+const { ProjectRoutes, UserRoutes, SectionRoutes } = require('./routes');
 
 config();
 loaders();
@@ -24,4 +24,5 @@ app.listen(PORT, () => {
   console.log(`Server is running on ${PORT}`);
   app.use('/projects', ProjectRoutes);
   app.use('/users', UserRoutes);
+  app.use('/sections', SectionRoutes);
 });
