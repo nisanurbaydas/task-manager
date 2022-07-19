@@ -1,11 +1,12 @@
 const e = require('express');
 const httpStatus = require('http-status');
 
-const { insert, list, modify, remove, findOne } = require('../services/Task');
+const Service = require('../services/Task');
+const TaskService = new Service();
 
 const index = (req, res) => {
   if (!req?.params?.projectId) return res.status(httpStatus.BAD_REQUEST).send({ error: 'Missing information' });
-  list({ project_id: req.params.projectId })
+  TaskService.list({ project_id: req.params.projectId })
     .then((response) => {
       res.status(httpStatus.OK).send(response);
     })
@@ -16,7 +17,7 @@ const index = (req, res) => {
 
 const create = (req, res) => {
   req.body.user_id = req.user;
-  insert(req.body)
+  TaskService.create(req.body)
     .then((response) => {
       res.status(httpStatus.CREATED).send(response);
     })
@@ -29,7 +30,7 @@ const update = (req, res) => {
   if (!req.params.id) {
     return res.status(httpStatus.BAD_REQUEST).send({ message: 'Missing information' });
   }
-  modify(req.body, req.params?.id)
+  TaskService.update(req.body, req.params?.id)
     .then((updatedTask) => {
       res.status(httpStatus.OK).send(updatedTask);
     })
@@ -40,7 +41,7 @@ const deleteTask = (req, res) => {
   if (!req.params.id) {
     return res.status(httpStatus.BAD_REQUEST).send('Missing information');
   }
-  remove(req.params?.id)
+  TaskService.delete(req.params?.id)
     .then((deletedItem) => {
       res.status(httpStatus.OK).send(deletedItem);
     })
@@ -50,7 +51,7 @@ const deleteTask = (req, res) => {
 };
 
 const addComment = (req, res) => {
-  findOne({ _id: req.params.id })
+  TaskService.findOne({ _id: req.params.id })
     .then((mainTask) => {
       if (!mainTask) return res.status(httpStatus.NOT_FOUND).send({ message: 'No such a reccord ' });
       const comment = {
@@ -70,7 +71,7 @@ const addComment = (req, res) => {
 };
 
 const deleteComment = (req, res) => {
-  findOne({ _id: req.params.id })
+  TaskService.findOne({ _id: req.params.id })
     .then((mainTask) => {
       if (!mainTask) return res.status(httpStatus.NOT_FOUND).send({ message: 'No such a reccord ' });
       mainTask.comments = mainTask.comments.filter((c) => c._id?.toString() !== req.params.commentId);
@@ -87,11 +88,11 @@ const deleteComment = (req, res) => {
 const addSubTask = (req, res) => {
   //MainTask çekilir
   if (!req.params.id) return res.status(httpStatus.BAD_REQUEST).send({ message: 'Missing information' });
-  findOne({ _id: req.params.id })
+  TaskService.findOne({ _id: req.params.id })
     .then((mainTask) => {
       if (!mainTask) return res.status(httpStatus.NOT_FOUND).send({ message: 'No such a reccord ' });
       //SubTask create edilir (Task)
-      insert({ ...req.body, user_id: req.user })
+      TaskService.create({ ...req.body, user_id: req.user })
         .then((subTask) => {
           //SubTask'in referansı MainTask üzerinde gösterilir ve update edilir
           mainTask.sub_tasks.push(subTask);
@@ -113,7 +114,7 @@ const addSubTask = (req, res) => {
 const fetchTask = (req, res) => {
   if (!req.params.id) return res.status(httpStatus.BAD_REQUEST).send({ message: 'Missing information' });
 
-  findOne({ _id: req.params.id }, true)
+  TaskService.findOne({ _id: req.params.id }, true)
     .then((task) => {
       if (!task) return res.status(httpStatus.NOT_FOUND).send({ message: 'No such record' });
       res.status(httpStatus.OK).send(task);
