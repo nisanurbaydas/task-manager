@@ -1,27 +1,27 @@
-let BaseModel = null;
+BaseModel = null;
 
 class BaseService {
   constructor(model) {
-    BaseModel = model;
+    this.BaseModel = model;
   }
   list(where) {
-    return BaseModel?.find(where || {});
+    return this.BaseModel?.find(where || {});
   }
 
   create(data) {
-    return new BaseModel(data).save();
+    return new this.BaseModel(data).save();
   }
 
   findOne(where) {
-    return BaseModel.findOne(where);
+    return this.BaseModel.findOne(where);
   }
 
   update(data, id) {
-    return BaseModel.findByIdAndUpdate(id, data, { new: true });
+    return this.BaseModel.findByIdAndUpdate(id, data, { new: true });
   }
 
   delete(id) {
-    return BaseModel.findByIdAndDelete(id);
+    return this.BaseModel.findByIdAndDelete(id);
   }
 }
 
