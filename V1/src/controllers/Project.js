@@ -1,9 +1,10 @@
 const httpStatus = require('http-status');
 
-const { insert, list, modify, remove } = require('../services/Project');
+const Service = require('../services/Project');
+const ProjectService = new Service();
 
 const index = (req, res) => {
-  list()
+  ProjectService.list()
     .then((response) => {
       res.status(httpStatus.OK).send(response);
     })
@@ -14,8 +15,7 @@ const index = (req, res) => {
 
 const create = (req, res) => {
   req.body.user_id = req.user;
-  insert(req.body)
-    // res.status(httpStatus.CREATED).send("Project Create");
+  ProjectService.create(req.body)
     .then((response) => {
       res.status(httpStatus.CREATED).send(response);
     })
@@ -26,33 +26,26 @@ const create = (req, res) => {
 
 const update = (req, res) => {
   if (!req.params.id) {
-    return res
-      .status(httpStatus.BAD_REQUEST)
-      .send({ message: 'Missing information' });
+    return res.status(httpStatus.BAD_REQUEST).send({ message: 'Missing information' });
   }
-  modify(req.body, req.params?.id)
+  ProjectService.update(req.body, req.params?.id)
     .then((updatedProject) => {
       res.status(httpStatus.OK).send(updatedProject);
     })
-    .catch(() =>
-      res
-        .status(httpStatus.INTERNAL_SERVER_ERROR)
-        .send({ error: 'Something went wrong' })
-    );
+    .catch(() => res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error: 'Something went wrong' }));
 };
 
 const deleteProject = (req, res) => {
   if (!req.params.id) {
     return res.status(httpStatus.BAD_REQUEST).send('Missing information');
   }
-  remove(req.params?.id)
+  ProjectService.delete(req.params?.id)
     .then((deletedItem) => {
+      if (!deletedItem) return res.status(httpStatus.NOT_FOUND).send('No such item');
       res.status(httpStatus.OK).send(deletedItem);
     })
-    .catch(() => {
-      res
-        .status(httpStatus.INTERNAL_SERVER_ERROR)
-        .send({ error: 'Something went wrong' });
+    .catch((e) => {
+      res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error: e });
     });
 };
 
@@ -60,5 +53,5 @@ module.exports = {
   index,
   create,
   update,
-  deleteProject
+  deleteProject,
 };

@@ -11,7 +11,7 @@ const authenticateToken = (req, res, next) => {
       message: 'Access Denied',
     });
   JWT.verify(token, process.env.ACCESS_TOKEN_SECRET_KEY, (err, user) => {
-    console.log(token);
+    //console.log(token);
     if (err) return res.status(httpStatus.FORBIDDEN).send(err);
     req.user = user?._doc;
     next();
