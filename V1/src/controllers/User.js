@@ -2,13 +2,9 @@ const path = require('path');
 const httpStatus = require('http-status');
 const uuid = require('uuid');
 
-const { insert, list, findOne, modify } = require('../services/User');
+const { insert, list, findOne, modify, remove } = require('../services/User');
 const projectService = require('../services/Project');
-const {
-  passwordToHash,
-  generateJWTAccessToken,
-  generateJWTRefreshToken,
-} = require('../scripts/utils/helper');
+const { passwordToHash, generateJWTAccessToken, generateJWTRefreshToken } = require('../scripts/utils/helper');
 const eventEmitter = require('../scripts/events/eventEmitter');
 
 const create = (req, res) => {
@@ -36,10 +32,7 @@ const login = (req, res) => {
   req.body.password = passwordToHash(req.body.password);
   findOne(req.body)
     .then((user) => {
-      if (!user)
-        return res
-          .status(httpStatus.NOT_FOUND)
-          .send({ message: 'User not found' });
+      if (!user) return res.status(httpStatus.NOT_FOUND).send({ message: 'User not found' });
       user = {
         ...user.toObject(),
         tokens: {
@@ -60,35 +53,23 @@ const projectList = (req, res) => {
     .then((projects) => {
       res.status(httpStatus.OK).send(projects);
     })
-    .catch(() =>
-      res
-        .status(httpStatus.INTERNAL_SERVER_ERROR)
-        .send({ error: 'Soething went wronng' })
-    );
+    .catch(() => res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error: 'Soething went wronng' }));
 };
 
 const resetPassword = (req, res) => {
-  const new_password =
-    uuid.v4()?.split('-')[0] || `usr-${new Date().getTime()}`;
+  const new_password = uuid.v4()?.split('-')[0] || `usr-${new Date().getTime()}`;
   modify({ email: req.body.email }, { password: passwordToHash(new_password) })
     .then((updatedUser) => {
-      if (!updatedUser)
-        return res.status(httpStatus.NOT_FOUND).send({ error: 'No such user' });
+      if (!updatedUser) return res.status(httpStatus.NOT_FOUND).send({ error: 'No such user' });
       eventEmitter.emit('send_email', {
         //info - send mail with defined transport object
         to: updatedUser.email,
         subject: 'Reset Password',
         html: `User password has been changed. <br /> Your new pasword -> ${new_password}`,
       });
-      res
-        .status(httpStatus.OK)
-        .send({ message: 'Required information is sent your e-mail' });
+      res.status(httpStatus.OK).send({ message: 'Required information is sent your e-mail' });
     })
-    .catch(() =>
-      res
-        .status(httpStatus.INTERNAL_SERVER_ERROR)
-        .send({ error: 'Something went wrong' })
-    );
+    .catch(() => res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error: 'Something went wrong' }));
 };
 
 const update = (req, res) => {
@@ -113,16 +94,42 @@ const updateProfileImage = (req, res) => {
   const folderPath = path.join(__dirname, '../', 'uploads/users', fileName);
 
   req.files.profile_image.mv(folderPath, function (err) {
-    if (err)
-      return res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error: err });
+    if (err) return res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error: err });
     modify({ _id: req.user._id }, { profile_image: fileName })
       .then((updatedUser) => {
         res.status(httpStatus.OK).send(updatedUser);
       })
-      .catch((e) =>
-        res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error: e })
-      );
+      .catch((e) => res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error: e }));
   });
+};
+
+const changePassword = (req, res) => {
+  req.body.password = passwordToHash(req.body.password);
+  modify({ _id: req.user?._id }, req.body)
+    .then((updatedUser) => {
+      res.status(httpStatus.OK).send(updatedUser);
+    })
+    .catch(() => res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error: 'Something went wrong' }));
+};
+
+const deleteUser = (req, res) => {
+  if (!req.params?.id) {
+    return res.status(httpStatus.BAD_REQUEST).send({
+      message: 'Missing information',
+    });
+  }
+  remove(req.params?.id)
+    .then((deletedItem) => {
+      if (!deletedItem) {
+        return res.status(httpStatus.NOT_FOUND).send({
+          message: 'No such record',
+        });
+      }
+      res.status(httpStatus.OK).send({
+        message: 'Record deleted successfully',
+      });
+    })
+    .catch((e) => res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error: e }));
 };
 
 module.exports = {
@@ -132,5 +139,7 @@ module.exports = {
   projectList,
   resetPassword,
   update,
-  updateProfileImage
+  updateProfileImage,
+  changePassword,
+  deleteUser
 };
