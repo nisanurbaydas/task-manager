@@ -1,37 +1,13 @@
-const User = require('../model/User');
+const BaseService = require('./BaseService');
+const BaseModel = require('../model/User');
 
-const insert = (data) => {
-  return new User(data).save();
-};
+class User extends BaseService {
+  constructor() {
+    super(BaseModel);
+  }
+  update(where, data) {
+    return BaseModel.findOneAndUpdate(where, data, { new: true });
+  }
+}
 
-const list = () => {
-  return User.find({});
-};
-
-const findOne = (where) => {
-  console.log(where);
-  return User.findOne(where);
-};
-
-const modify = (where, data) => {
-  //If we didn't have joi validation just to update user:
-  /*
-  Object.keys(data).reduce((obj, key)=>{
-    if(key !== 'password') obj[key] = data[key];
-    return obj;
-  }, {});
-  */
-  return User.findOneAndUpdate(where, data, { new: true });
-};
-
-const remove = (id) => {
-  return User.findByIdAndDelete(id);
-};
-
-module.exports = {
-  insert,
-  list,
-  findOne,
-  modify,
-  remove,
-};
+module.exports = User;
