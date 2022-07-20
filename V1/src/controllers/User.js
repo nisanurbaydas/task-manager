@@ -123,11 +123,7 @@ const deleteUser = (req, res) => {
   }
   UserService.delete(req.params?.id)
     .then((deletedItem) => {
-      if (!deletedItem) {
-        return res.status(httpStatus.NOT_FOUND).send({
-          message: 'No such record',
-        });
-      }
+      if (!deletedItem) return res.status(httpStatus.NOT_FOUND).send({ message: 'No such record' });
       res.status(httpStatus.OK).send({
         message: 'Record deleted successfully',
       });

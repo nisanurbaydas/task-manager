@@ -8,13 +8,17 @@ const { createUser, userLogin, resetPasswordValidation, updateUser, changePasswo
 const router = express.Router();
 
 router.get('/', index);
-router.route('/').post(validate(createUser), create);
-router.route('/').patch(authenticate, validate(updateUser), update);
-router.route('/login').post(validate(userLogin), login);
 router.route('/projects').get(authenticate, projectList);
-router.route('/reset-password').post(validate(resetPasswordValidation), resetPassword);
+
+router.route('/').post(validate(createUser), create);
+router.route('/login').post(validate(userLogin), login);
+
+router.route('/').patch(authenticate, validate(updateUser), update);
 router.route('/update-profile-image').post(authenticate, updateProfileImage);
+
+router.route('/reset-password').post(validate(resetPasswordValidation), resetPassword);
 router.route('/change-password').patch(authenticate, validate(changePasswordValidation), changePassword);
+
 router.route('/:id').delete(authenticate, deleteUser);
 
 module.exports = router;

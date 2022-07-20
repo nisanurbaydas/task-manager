@@ -31,8 +31,9 @@ const update = (req, res) => {
   if (!req.params.id) {
     return res.status(httpStatus.BAD_REQUEST).send({ message: 'Missing information' });
   }
-  SectionService.update(req.body, req.params?.id)
+  SectionService.update(req.params?.id, req.body)
     .then((updatedSection) => {
+      if(!updatedSection) return res.status(httpStatus.NOT_FOUND).send({ message: 'No such record' });
       res.status(httpStatus.OK).send(updatedSection);
     })
     .catch(() => res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error: 'Something went wrong' }));
@@ -44,6 +45,7 @@ const deleteSection = (req, res) => {
   }
   SectionService.delete(req.params?.id)
     .then((deletedItem) => {
+      if(!deletedItem) return res.status(httpStatus.NOT_FOUND).send({ message: 'No such record' });
       res.status(httpStatus.OK).send(deletedItem);
     })
     .catch(() => {

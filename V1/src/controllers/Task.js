@@ -30,7 +30,7 @@ const update = (req, res) => {
   if (!req.params.id) {
     return res.status(httpStatus.BAD_REQUEST).send({ message: 'Missing information' });
   }
-  TaskService.update(req.body, req.params?.id)
+  TaskService.update(req.params?.id, req.body)
     .then((updatedTask) => {
       res.status(httpStatus.OK).send(updatedTask);
     })
