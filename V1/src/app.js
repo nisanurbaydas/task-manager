@@ -6,13 +6,9 @@ const helmet = require('helmet');
 const config = require('./config');
 const loaders = require('./loaders');
 const events = require('./scripts/events');
+const errorHandler = require('./middlewares/errorHandler');
 
-const {
-  ProjectRoutes,
-  UserRoutes,
-  SectionRoutes,
-  TaskRoutes,
-} = require('./routes');
+const { ProjectRoutes, UserRoutes, SectionRoutes, TaskRoutes } = require('./routes');
 
 config();
 loaders();
@@ -31,4 +27,13 @@ app.listen(PORT, () => {
   app.use('/users', UserRoutes);
   app.use('/sections', SectionRoutes);
   app.use('/tasks', TaskRoutes);
+
+  app.use((req, res, next) => {
+    const error = new Error('Page you are looking for does not exist');
+    error.status = 404;
+    next(error);
+  });
+
+  //Error Handler
+  app.use(errorHandler);
 });

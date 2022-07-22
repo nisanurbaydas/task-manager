@@ -2,6 +2,7 @@ const httpStatus = require('http-status');
 
 const Service = require('../services/Project');
 const ProjectService = new Service();
+const ApiError = require('../errors/ApiError');
 
 const index = (req, res) => {
   ProjectService.list()
@@ -24,16 +25,16 @@ const create = (req, res) => {
     });
 };
 
-const update = (req, res) => {
+const update = (req, res, next) => {
   if (!req.params.id) {
     return res.status(httpStatus.BAD_REQUEST).send({ message: 'Missing information' });
   }
   ProjectService.update(req.params?.id, req.body)
     .then((updatedProject) => {
-      if (!updatedProject) return res.status(httpStatus.NOT_FOUND).send({ message: 'No such record' });
+      if (!updatedProject) return next(new ApiError('No such a record', '404'));
       res.status(httpStatus.OK).send(updatedProject);
     })
-    .catch(() => res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error: 'Something went wrong' }));
+    .catch((e) => next(new ApiError(e?.message)));
 };
 
 const deleteProject = (req, res) => {
