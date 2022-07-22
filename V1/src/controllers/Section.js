@@ -1,56 +1,42 @@
 const httpStatus = require('http-status');
 
-//const { insert, list, modify, remove } = require('../services/Section');
 const Service = require('../services/Section');
 const SectionService = new Service();
+const ApiError = require('../errors/ApiError');
 
-const index = (req, res) => {
-  if (!req?.params?.projectId) return res.status(httpStatus.BAD_REQUEST).send({ error: 'Missing information' });
+const index = (req, res, next) => {
   SectionService.list({ project_id: req.params.projectId })
     .then((response) => {
       res.status(httpStatus.OK).send(response);
     })
-    .catch((e) => {
-      res.status(httpStatus.INTERNAL_SERVER_ERROR).send(e.message);
-    });
+    .catch((e) => next(new ApiError(e?.message)));
 };
 
-const create = (req, res) => {
+const create = (req, res, next) => {
   req.body.user_id = req.user;
   SectionService.create(req.body)
-    // res.status(httpStatus.CREATED).send("Section Create");
     .then((response) => {
       res.status(httpStatus.CREATED).send(response);
     })
-    .catch((e) => {
-      res.status(httpStatus.INTERNAL_SERVER_ERROR).send(e.message);
-    });
+    .catch((e) => next(new ApiError(e?.message)));
 };
 
-const update = (req, res) => {
-  if (!req.params.id) {
-    return res.status(httpStatus.BAD_REQUEST).send({ message: 'Missing information' });
-  }
+const update = (req, res, next) => {
   SectionService.update(req.params?.id, req.body)
     .then((updatedSection) => {
-      if(!updatedSection) return res.status(httpStatus.NOT_FOUND).send({ message: 'No such record' });
+      if (!updatedSection) return next(new ApiError('No such a record', httpStatus.NOT_FOUND));
       res.status(httpStatus.OK).send(updatedSection);
     })
-    .catch(() => res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error: 'Something went wrong' }));
+    .catch((e) => next(new ApiError(e?.message)));
 };
 
-const deleteSection = (req, res) => {
-  if (!req.params.id) {
-    return res.status(httpStatus.BAD_REQUEST).send('Missing information');
-  }
+const deleteSection = (req, res, next) => {
   SectionService.delete(req.params?.id)
     .then((deletedItem) => {
-      if(!deletedItem) return res.status(httpStatus.NOT_FOUND).send({ message: 'No such record' });
+      if (!deletedItem) return next(new ApiError('No such a record', httpStatus.NOT_FOUND));
       res.status(httpStatus.OK).send(deletedItem);
     })
-    .catch(() => {
-      res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error: 'Something went wrong' });
-    });
+    .catch((e) => next(new ApiError(e?.message)));
 };
 
 module.exports = {

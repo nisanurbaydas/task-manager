@@ -11,32 +11,30 @@ const ProjectService = new projectService();
 const { passwordToHash, generateJWTAccessToken, generateJWTRefreshToken } = require('../scripts/utils/helper');
 const eventEmitter = require('../scripts/events/eventEmitter');
 
-const create = (req, res) => {
+const ApiError = require('../errors/ApiError');
+
+const create = (req, res, next) => {
   req.body.password = passwordToHash(req.body.password);
   UserService.create(req.body)
     .then((response) => {
       res.status(httpStatus.CREATED).send(response);
     })
-    .catch((e) => {
-      res.status(httpStatus.INTERNAL_SERVER_ERROR).send(e.message);
-    });
+    .catch((e) => next(new ApiError(e?.message)));
 };
 
-const index = (req, res) => {
+const index = (req, res, next) => {
   UserService.list()
     .then((response) => {
       res.status(httpStatus.OK).send(response);
     })
-    .catch((e) => {
-      res.status(httpStatus.INTERNAL_SERVER_ERROR).send(e);
-    });
+    .catch((e) => next(new ApiError(e?.message)));
 };
 
-const login = (req, res) => {
+const login = (req, res, next) => {
   req.body.password = passwordToHash(req.body.password);
   UserService.findOne(req.body)
     .then((user) => {
-      if (!user) return res.status(httpStatus.NOT_FOUND).send({ message: 'User not found' });
+      if (!user) return next(new ApiError('No such a record', httpStatus.NOT_FOUND));
       user = {
         ...user.toObject(),
         tokens: {
@@ -47,23 +45,22 @@ const login = (req, res) => {
       delete user.password;
       res.status(httpStatus.OK).send(user);
     })
-    .catch((e) => res.status(httpStatus.INTERNAL_SERVER_ERROR).send(e));
+    .catch((e) => next(new ApiError(e?.message)));
 };
 
-const projectList = (req, res) => {
-  //console.log(req.user);
+const projectList = (req, res, next) => {
   ProjectService.list({ user_id: req.user?._id })
     .then((projects) => {
       res.status(httpStatus.OK).send(projects);
     })
-    .catch(() => res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error: 'Soething went wronng' }));
+    .catch((e) => next(new ApiError(e?.message)));
 };
 
-const resetPassword = (req, res) => {
+const resetPassword = (req, res, next) => {
   const new_password = uuid.v4()?.split('-')[0] || `usr-${new Date().getTime()}`;
   UserService.update({ email: req.body.email }, { password: passwordToHash(new_password) })
     .then((updatedUser) => {
-      if (!updatedUser) return res.status(httpStatus.NOT_FOUND).send({ error: 'No such user' });
+      if (!updatedUser) return next(new ApiError('No such a record', httpStatus.NOT_FOUND));
       eventEmitter.emit('send_email', {
         //info - send mail with defined transport object
         to: updatedUser.email,
@@ -72,20 +69,19 @@ const resetPassword = (req, res) => {
       });
       res.status(httpStatus.OK).send({ message: 'Required information is sent your e-mail' });
     })
-    .catch(() => res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error: 'Something went wrong' }));
+    .catch((e) => next(new ApiError(e?.message)));
 };
 
-const update = (req, res) => {
+const update = (req, res, next) => {
   UserService.update({ _id: req.user?._id }, req.body)
     .then((updatedUser) => {
+      if (!updatedUser) return next(new ApiError('No such a record', httpStatus.NOT_FOUND));
       res.status(httpStatus.OK).send(updatedUser);
     })
-    .catch(() => {
-      res.status(httpStatus.INTERNAL_SERVER_ERROR).send('Something went wrong');
-    });
+    .catch((e) => next(new ApiError(e?.message)));
 };
 
-const updateProfileImage = (req, res) => {
+const updateProfileImage = (req, res, next) => {
   // Check file
   if (!req?.files?.profile_image) {
     return res.status(httpStatus.BAD_REQUEST).send({ error: 'Missing info' });
@@ -102,28 +98,24 @@ const updateProfileImage = (req, res) => {
       .then((updatedUser) => {
         res.status(httpStatus.OK).send(updatedUser);
       })
-      .catch((e) => res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error: e }));
+      .catch((e) => next(new ApiError(e?.message)));
   });
 };
 
-const changePassword = (req, res) => {
+const changePassword = (req, res, next) => {
   req.body.password = passwordToHash(req.body.password);
   UserService.update({ _id: req.user?._id }, req.body)
     .then((updatedUser) => {
+      if (!updatedUser) return next(new ApiError('No such a record', httpStatus.NOT_FOUND));
       res.status(httpStatus.OK).send(updatedUser);
     })
-    .catch(() => res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error: 'Something went wrong' }));
+    .catch((e) => next(new ApiError(e?.message)));
 };
 
-const deleteUser = (req, res) => {
-  if (!req.params?.id) {
-    return res.status(httpStatus.BAD_REQUEST).send({
-      message: 'Missing information',
-    });
-  }
+const deleteUser = (req, res, next) => {
   UserService.delete(req.params?.id)
     .then((deletedItem) => {
-      if (!deletedItem) return res.status(httpStatus.NOT_FOUND).send({ message: 'No such record' });
+      if (!deletedItem) return next(new ApiError('No such a record', httpStatus.NOT_FOUND));
       res.status(httpStatus.OK).send({
         message: 'Record deleted successfully',
       });
